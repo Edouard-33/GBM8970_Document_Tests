@@ -250,7 +250,7 @@ def afficher(tableau: pd.DataFrame) -> None:
     print(f"  Paliers conformes  : {n_oui} / {len(tableau)}")
     print(sep)
 
-# POINT D'ENTRÉE
+# MAIN
 if __name__ == "__main__":
     chemin_csv    = sys.argv[1] if len(sys.argv) > 1 else "pressure_data_T4.csv"
     chemin_export = sys.argv[2] if len(sys.argv) > 2 else None
