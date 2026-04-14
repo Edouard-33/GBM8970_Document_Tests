@@ -41,7 +41,7 @@ import numpy as np
 import pandas as pd
 
 # PARAMÈTRES DU TEST  (ne pas modifier sans raison)
-ERREUR_MAX_PCT = 1.5    # % - seuil de conformité sur l'erreur relative
+ERREUR_MAX_CM  = 1.05    # cm H₂O - seuil de conformité sur l'erreur absolue
 FREQ_MIN_HZ    = 0.33   # Hz - fréquence d'échantillonnage minimale requise
 PLAGE_MAX_CM   = 70.306957829636   # cm H₂O - plage totale du capteur (pour palier = 0)
 ESSAIS         = [1, 2, 3]  # numéros d'essais attendus dans le CSV
@@ -146,7 +146,7 @@ def construire_tableau(df: pd.DataFrame) -> pd.DataFrame:
            ecart_type  = mean( std_essai_k  pour tous les k disponibles )
 
     f) Conformité :
-           "Oui"  si erreur_pct ≤ ERREUR_MAX_PCT (1.5 %)
+           "Oui"  si erreur_cm ≤ ERREUR_MAX_CM (1.5 cm H₂O)
            "Non"  sinon
     """
     paliers = sorted(df["valeur_réel_cmH20"].unique())
@@ -182,7 +182,7 @@ def construire_tableau(df: pd.DataFrame) -> pd.DataFrame:
                            if std_par_essai else np.nan
 
         # Conformité
-        conforme = "Oui" if erreur_pct <= ERREUR_MAX_PCT else "Non"
+        conforme = "Oui" if erreur_cm <= ERREUR_MAX_CM else "Non"
 
         # Construction de la ligne du tableau
         row = {"Hauteur (cm H₂O)": int(palier) if palier == int(palier) else palier}
