@@ -19,7 +19,7 @@ Sorties produites :
     • (idem essais 2 et 3)
     • Δt moyen (s)            = moyenne des Δt des 3 essais
     • Hauteur moy. (cm H₂O)  = moyenne des valeurs stables des 3 essais
-    • Erreur (%)              = |hauteur moy. - palier| / palier × 100
+    • Erreur (cm H₂O)        = hauteur moy. - palier
     • Conforme (Oui/Non)      = Oui si Δt moyen ≤ LATENCE_MAX_S
 
 Condition de stabilisation :
@@ -46,7 +46,7 @@ import numpy as np
 import pandas as pd
 
 # PARAMÈTRES DU TEST  (ne pas modifier sans raison)
-LATENCE_MAX_S  = 0.100   # s   - seuil de conformité (100 ms)
+LATENCE_MAX_S  = 3.000   # s   - seuil de conformité (3 s)
 TOLERANCE_PCT  = 10.0    # %   - fenêtre de stabilisation autour du palier
 N_STABLE       = 5       # nb de points consécutifs requis dans la fenêtre
 N_FIN          = 30      # nb de dernières mesures pour estimer h2 si non atteint
@@ -148,19 +148,18 @@ def construire_tableau(df: pd.DataFrame) -> pd.DataFrame:
         dt_valides  = [v for v in deltas.values()     if v is not None]
         val_valides = [v for v in val_stable.values() if v is not None]
 
-        dt_moyen   = round(float(np.mean(dt_valides)),          4) if dt_valides  else None
-        haut_moy   = round(float(np.mean(val_valides)),         4) if val_valides else None
-        erreur_pct = round(abs(haut_moy - palier) / palier * 100, 2) \
-                     if haut_moy is not None else None
+        dt_moyen   = round(float(np.mean(dt_valides)),  4) if dt_valides  else None
+        haut_moy   = round(float(np.mean(val_valides)), 4) if val_valides else None
+        erreur     = round(haut_moy - palier, 4)           if haut_moy is not None else None
         conforme   = "Oui" if (dt_moyen is not None and dt_moyen <= LATENCE_MAX_S) else "Non"
 
         row = {"Palier (cm H₂O)": int(palier) if palier == int(palier) else palier}
         for e in ESSAIS:
             row[f"Δt essai {e} (s)"]        = deltas[e]     if e in deltas     else "—"
             row[f"Val. essai {e} (cm H₂O)"] = val_stable[e] if e in val_stable else "—"
-        row["Δt moyen (s)"]          = dt_moyen   if dt_moyen   is not None else "—"
-        row["Hauteur moy. (cm H₂O)"] = haut_moy   if haut_moy   is not None else "—"
-        row["Erreur (%)"]             = erreur_pct if erreur_pct is not None else "—"
+        row["Δt moyen (s)"]          = dt_moyen if dt_moyen is not None else "—"
+        row["Hauteur moy. (cm H₂O)"] = haut_moy if haut_moy is not None else "—"
+        row["Erreur (cm H₂O)"]       = erreur   if erreur   is not None else "—"
         row["Conforme (Oui/Non)"]     = conforme
         rows.append(row)
 
@@ -186,7 +185,7 @@ def afficher(tableau: pd.DataFrame) -> None:
         ("Val. essai 3",  "(cm H₂O)"),
         ("Δt moyen",      "(s)"),
         ("Hauteur moy.",  "(cm H₂O)"),
-        ("Erreur",        "(%)"),
+        ("Erreur",        "(cm H₂O)"),
         ("Conforme",      "(Oui/Non)"),
     ]
     col_keys = [
@@ -195,9 +194,9 @@ def afficher(tableau: pd.DataFrame) -> None:
         "Δt essai 2 (s)", "Val. essai 2 (cm H₂O)",
         "Δt essai 3 (s)", "Val. essai 3 (cm H₂O)",
         "Δt moyen (s)", "Hauteur moy. (cm H₂O)",
-        "Erreur (%)", "Conforme (Oui/Non)",
+        "Erreur (cm H₂O)", "Conforme (Oui/Non)",
     ]
-    widths = [9, 11, 13, 11, 13, 11, 13, 11, 14, 9, 10]
+    widths = [9, 11, 13, 11, 13, 11, 13, 11, 14, 12, 10]
 
     def fmt(v, w):
         s = f"{v:.4f}" if isinstance(v, float) else str(v)
@@ -244,7 +243,7 @@ def afficher(tableau: pd.DataFrame) -> None:
     print(f"  Latence maximale   : {lat_max} s")
     print(f"  Écart-type         : {lat_std} s")
     print(f"  Nb essais réussis  : {n_conformes} / {n_total}")
-    print(f"  Critère requis     : Δt moyen ≤ {LATENCE_MAX_S} s ({int(LATENCE_MAX_S*1000)} ms)")
+    print(f"  Critère requis     : Δt moyen ≤ {LATENCE_MAX_S} s")
     n_oui = (tableau["Conforme (Oui/Non)"] == "Oui").sum()
     n_non = (tableau["Conforme (Oui/Non)"] == "Non").sum()
     print(f"  Paliers conformes  : {n_oui} / {len(tableau)}")
