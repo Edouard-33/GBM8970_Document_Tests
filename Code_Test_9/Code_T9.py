@@ -8,7 +8,7 @@ Structure du CSV attendu (5 colonnes, séparateur ;) :
   - id           : identifiant de la mesure
   - date         : date/heure de l'acquisition
   - time_s       : temps en secondes depuis le début de l'acquisition
-  - mesure_cmH20 : valeur mesurée par le capteur (cm H₂O)
+  - mesure_cmH20 : valeur mesurée par le capteur (m)
   - distance     : distance de test en mètres (1, 2, 3, ... 7)
 
 Sorties produites :
